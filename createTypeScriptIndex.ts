@@ -156,8 +156,11 @@ export async function createTypeScriptIndex(_option: ICreateTsIndexOption): Prom
     const targetFileGlob = option.targetExts.map(ext => `*.${ext}`).join('|');
     const globFunc = util.promisify<string, glob.IOptions, string[]>(glob);
     const allTsFiles = await globFunc(`**/+(${targetFileGlob})`, option.globOptions);
+	
+	// Handle windows files by normalizing paths
+	const allTsFilesNormalized = allTsFiles.map(path.normalize);
 
-    const tsFiles = allTsFiles
+    const tsFiles = allTsFilesNormalized
       // Step 1, remove exclude directory
       .filter((tsFilePath) => {
         return !option.excludes.reduce<boolean>(
