@@ -131,14 +131,6 @@ function createTypeScriptIndex(_option) {
             })
                 // Step 2, remove declare file(*.d.ts)
                 .filter(tsFilePath => !tsFilePath.endsWith('.d.ts'))
-                // Step 3, remove exclude pattern
-                .filter((tsFilePath) => {
-                return !option.fileExcludePatterns
-                    .map((excludePattern) => new RegExp(excludePattern, 'i'))
-                    .reduce((result, regExp) => {
-                    return result || regExp.test(tsFilePath);
-                }, false);
-            })
                 // Step 4, remove index file(index.ts, index.tsx etc ...)
                 .filter((tsFilePath) => {
                 return !option.targetExts

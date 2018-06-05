@@ -181,7 +181,7 @@ export async function createTypeScriptIndex(_option: ICreateTsIndexOption): Prom
 					.map((excludePattern: string) => new RegExp(excludePattern, 'i'))
 					.reduce<boolean>(
 						(result: boolean, regExp: RegExp) => {
-							return result || regExp.test(tsFilePath);
+							return result || regExp.test(path.basename(tsFilePath));
 						},
 						false,
 					);
