@@ -112,6 +112,7 @@ function createTypeScriptIndex(_option) {
             option.excludes = option.excludes || [
                 '@types', 'typings', '__test__', '__tests__', 'node_modules',
             ];
+            option.excludePatterns = option.excludePatterns || [];
             option.targetExts = option.targetExts || ['ts', 'tsx'];
             option.targetExts = option.targetExts.sort((l, r) => r.length - l.length);
             const targetFileGlob = option.targetExts.map(ext => `*.${ext}`).join('|');
@@ -140,6 +141,14 @@ function createTypeScriptIndex(_option) {
                     .map(ext => `index.${ext}`)
                     .reduce((result, indexFile) => {
                     return result || tsFilePath.indexOf(indexFile) >= 0;
+                }, false);
+            })
+                // Step 5, remove exclude patterns
+                .filter((tsFilePath) => {
+                return !option.excludePatterns
+                    .map((excludePattern) => new RegExp(excludePattern, 'i'))
+                    .reduce((result, regExp) => {
+                    return result || regExp.test(tsFilePath);
                 }, false);
             });
             const dupLibDirs = tsFiles
