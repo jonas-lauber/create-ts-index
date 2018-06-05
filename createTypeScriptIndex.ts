@@ -12,7 +12,6 @@ export interface ICreateTsIndexOption {
 	useTimestamp?: boolean;
 	includeCWD?: boolean;
 	excludes?: string[];
-	excludePatterns?: string[];
 	fileExcludePatterns?: string[];
 	targetExts?: string[];
 	globOptions?: glob.IOptions;
@@ -82,14 +81,17 @@ export async function indexWriter(directory: string,
 
 		categorized.dir.sort();
 
-		const files = categorized.allFiles.filter((element) => {
-			return !option.fileExcludePatterns.reduce<boolean>(
-				(result, excludePattern) => {
-					return result || element.indexOf(excludePattern) >= 0;
-				},
-				false,
-			);
-		});
+		const files = categorized.allFiles
+			.filter((tsFilePath) => {
+				return !option.fileExcludePatterns
+					.map((excludePattern: string) => new RegExp(excludePattern, 'i'))
+					.reduce<boolean>(
+						(result: boolean, regExp: RegExp) => {
+							return result || regExp.test(tsFilePath);
+						},
+						false,
+					);
+			});
 
 		files.sort();
 
@@ -149,7 +151,6 @@ export async function createTypeScriptIndex(_option: ICreateTsIndexOption): Prom
 		option.excludes = option.excludes || [
 			'@types', 'typings', '__test__', '__tests__', 'node_modules',
 		];
-		option.excludePatterns = option.excludePatterns || [];
 		option.targetExts = option.targetExts || ['ts', 'tsx'];
 		option.targetExts = option.targetExts.sort((l, r) => r.length - l.length);
 
@@ -176,12 +177,14 @@ export async function createTypeScriptIndex(_option: ICreateTsIndexOption): Prom
 
 			// Step 3, remove exclude pattern
 			.filter((tsFilePath) => {
-				return !option.fileExcludePatterns.reduce<boolean>(
-					(result, excludePattern) => {
-						return result || tsFilePath.indexOf(excludePattern) >= 0;
-					},
-					false,
-				);
+				return !option.fileExcludePatterns
+					.map((excludePattern: string) => new RegExp(excludePattern, 'i'))
+					.reduce<boolean>(
+						(result: boolean, regExp: RegExp) => {
+							return result || regExp.test(tsFilePath);
+						},
+						false,
+					);
 			})
 
 			// Step 4, remove index file(index.ts, index.tsx etc ...)
@@ -191,18 +194,6 @@ export async function createTypeScriptIndex(_option: ICreateTsIndexOption): Prom
 					.reduce<boolean>(
 						(result, indexFile) => {
 							return result || tsFilePath.indexOf(indexFile) >= 0;
-						},
-						false,
-					);
-			})
-
-			// Step 5, remove exclude patterns
-			.filter((tsFilePath) => {
-				return !option.excludePatterns
-					.map((excludePattern: string) => new RegExp(excludePattern, 'i'))
-					.reduce<boolean>(
-						(result: boolean, regExp: RegExp) => {
-							return result || regExp.test(tsFilePath);
 						},
 						false,
 					);

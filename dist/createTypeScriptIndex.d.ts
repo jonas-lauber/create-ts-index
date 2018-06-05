@@ -7,7 +7,6 @@ export interface ICreateTsIndexOption {
     useTimestamp?: boolean;
     includeCWD?: boolean;
     excludes?: string[];
-    excludePatterns?: string[];
     fileExcludePatterns?: string[];
     targetExts?: string[];
     globOptions?: glob.IOptions;

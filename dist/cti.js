@@ -25,6 +25,9 @@ commander
     .option('-e --excludes <list>', 'pass exclude directory. default exclude directory is `[\'@types\', \'typings\', \'__test__\', \'__tests__\']`', // tslint:disable-line
 // tslint:disable-line
 values => values.split(/[ |,]/).map(value => value.trim()))
+    .option('-ep --excludePatterns <list>', 'pass exclude pattern paths. default is `[]`', // tslint:disable-line
+// tslint:disable-line
+values => values.split(/[ |,]/).map(value => value.trim()))
     .option('-i --fileexcludes <list>', 'pass exclude pattern of filename. default exclude directory is `[]`', // tslint:disable-line
 // tslint:disable-line
 values => values.split(/[ |,]/).map(value => value.trim()))

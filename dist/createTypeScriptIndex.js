@@ -56,9 +56,12 @@ function indexWriter(directory, directories, option) {
                 return result;
             }, { dir: [], allFiles: [] });
             categorized.dir.sort();
-            const files = categorized.allFiles.filter((element) => {
-                return !option.fileExcludePatterns.reduce((result, excludePattern) => {
-                    return result || element.indexOf(excludePattern) >= 0;
+            const files = categorized.allFiles
+                .filter((tsFilePath) => {
+                return !option.fileExcludePatterns
+                    .map((excludePattern) => new RegExp(excludePattern, 'i'))
+                    .reduce((result, regExp) => {
+                    return result || regExp.test(tsFilePath);
                 }, false);
             });
             files.sort();
@@ -112,7 +115,6 @@ function createTypeScriptIndex(_option) {
             option.excludes = option.excludes || [
                 '@types', 'typings', '__test__', '__tests__', 'node_modules',
             ];
-            option.excludePatterns = option.excludePatterns || [];
             option.targetExts = option.targetExts || ['ts', 'tsx'];
             option.targetExts = option.targetExts.sort((l, r) => r.length - l.length);
             const targetFileGlob = option.targetExts.map(ext => `*.${ext}`).join('|');
@@ -131,8 +133,10 @@ function createTypeScriptIndex(_option) {
                 .filter(tsFilePath => !tsFilePath.endsWith('.d.ts'))
                 // Step 3, remove exclude pattern
                 .filter((tsFilePath) => {
-                return !option.fileExcludePatterns.reduce((result, excludePattern) => {
-                    return result || tsFilePath.indexOf(excludePattern) >= 0;
+                return !option.fileExcludePatterns
+                    .map((excludePattern) => new RegExp(excludePattern, 'i'))
+                    .reduce((result, regExp) => {
+                    return result || regExp.test(tsFilePath);
                 }, false);
             })
                 // Step 4, remove index file(index.ts, index.tsx etc ...)
@@ -141,14 +145,6 @@ function createTypeScriptIndex(_option) {
                     .map(ext => `index.${ext}`)
                     .reduce((result, indexFile) => {
                     return result || tsFilePath.indexOf(indexFile) >= 0;
-                }, false);
-            })
-                // Step 5, remove exclude patterns
-                .filter((tsFilePath) => {
-                return !option.excludePatterns
-                    .map((excludePattern) => new RegExp(excludePattern, 'i'))
-                    .reduce((result, regExp) => {
-                    return result || regExp.test(tsFilePath);
                 }, false);
             });
             const dupLibDirs = tsFiles
